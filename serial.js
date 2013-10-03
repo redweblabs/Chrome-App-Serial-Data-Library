@@ -5,8 +5,6 @@ var serial = function(options){
 		return false;
 	}
 
-	console.log("Started " + Date.now()*1000 );
-
 	if(options.serialPort !== undefined && options.serialPort !== null){
 		serial.prototype.options.serialPort = options.serialPort;
 	}
@@ -36,8 +34,13 @@ serial.prototype.options = {
 	baudRate : 9600,
 	parser : "\n",
 	readLength : 1,
-	connectionId : undefined
+	connectionId : undefined,
+	connected : false
 }
+
+//=======================================
+// ab2str && str2ab found at http://developer.chrome.com/apps/app_hardware.html
+//=======================================
 
 serial.prototype.ab2str = function(buf) {
 
@@ -70,8 +73,6 @@ serial.prototype.write = function(string){
 
 serial.prototype.read = function(info){
 
-		// console.log(info);
-
 		var uint8View = serial.prototype.ab2str(new Uint8Array(info.data));
 
 		if(uint8View !== serial.prototype.options.parser){
@@ -95,7 +96,19 @@ serial.prototype.read = function(info){
 serial.prototype.flush = function(){
 	chrome.serial.flush(serial.prototype.options.connectionId, function(){
 		console.log("Flushed");
-	})
+	});
+}
+
+serial.prototype.close = function(userCallback){
+
+	if(userCallback === undefined || userCallback === null){
+		userCallback = function(e){
+			console.log(e);
+		}
+	}
+
+	chrome.serial.close(serial.prototype.options.connectionId, userCallback) 
+
 }
 
 serial.prototype.connect = function(){
@@ -107,6 +120,7 @@ serial.prototype.connect = function(){
 	}, function(result){
 		console.log("Connected to " + serial.prototype.options.serialPort + " @ " + serial.prototype.options.baudRate);
 		serial.prototype.options.connectionId = result.connectionId
+		serial.prototype.options.connected = true;
 		chrome.serial.read(serial.prototype.options.connectionId, serial.prototype.options.readLength, serial.prototype.read);
 
 	});
