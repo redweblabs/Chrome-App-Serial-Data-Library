@@ -60,4 +60,21 @@ Will clear any bytes in the ports I/O buffers.
 ####close()
 Close the current connection.
 
+###Manifest
+You must remember to include the "serial" permission in order to use the library in your app.
 
+```Javascript
+{
+	"manifest_version" : 2,
+	"name" : "My Serial App",
+	"version" : "0.0.1",
+	"app" : {
+		"background" : {
+			"scripts" : ["main.js"]
+		}
+	},
+	"permissions": [
+	  "serial"
+	]
+}
+```
